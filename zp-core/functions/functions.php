@@ -314,7 +314,7 @@ function zpFormattedDate($format = '', $datetime = '', $localized_date = null) {
 			'locale_preferreddate_time',
 			'locale_preferreddate_notime'
 	);
-	if ($localized_date) {
+	if ($localized_date && extension_loaded('intl')) { 
 		$datetime_formats = getStandardDateFormats();
 		$date_formats = getStandardDateFormats('date');
 		$time_formats = getStandardDateFormats('time');
@@ -665,21 +665,23 @@ function getPluginFiles($pattern, $folder = '', $stripsuffix = true) {
 }
 
 /**
- * Returns the fully qualified file name of the plugin file.
- *
- * Note: order of selection is:
- * 	1-theme folder file (if $inTheme is set)
- *  2-user plugin folder file
- *  3-zp-extensions file
- * first file found is used
+ * Returns the fully qualified file path of a plugin file.
+ * 
+ * Note: order of selection is if the file is named "something.php":
+ * 
+ * - 1-theme folder file (if $inTheme is set): /themes/currenthemefolder/something.php
+ * - 2-user plugin folder file: /plugins/something.php
+ * - 3-zp-extensions file /zp-core/zp-extensions/something.php
+ * 
+ * First file found is used. Returns false if no file is found.
  *
  * @param string $plugin is the name of the plugin file, typically something.php
  * @param bool $inTheme tells where to find the plugin.
- *   true means look in the current theme
+ *   true means look in the current theme. This for example can be also used to load a additional custom css file for theme customizations so the theme itself does not need to be modified.
  *   false means look in the zp-core/plugins folder.
  * @param bool $webpath return a WEBPATH rather than a SERVERPATH
  *
- * @return string
+ * @return string|false
  */
 function getPlugin($plugin, $inTheme = false, $webpath = false) {
 	global $_zp_gallery;
@@ -3061,7 +3063,7 @@ function printDataUsageNotice() {
  * 
  * @since 1.5.8
  * 
- * @param string $section Name of the section to get: 'authenticaion', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
+ * @param string $section Name of the section to get: 'authentication', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
  * @return array
  */
 function getCookieInfoData($section = null) {
@@ -3131,7 +3133,7 @@ function getCookieInfoData($section = null) {
  * 
  * @since 1.5.8
  * 
- * @param string $section Name of the section to get: 'authenticaion', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
+ * @param string $section Name of the section to get: 'authentication', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
  * @param string $sectionheadline Add h2 to h6 to print as the section headline, h2 default.
  * @return string
  */
@@ -3163,7 +3165,7 @@ function getCookieInfoHTML($section = null, $sectionheadline = 'h2') {
  * 
  * @since 1.5.8
  * 
- * @param string $section Name of the section to get: 'authenticaion', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
+ * @param string $section Name of the section to get: 'authentication', 'search', 'admin', 'cookie', 'various' or null (default) for the full array
  * @param string $sectionheadline Add h2 to h6 to print as the section headline, h2 default.
  */
 function printCookieInfo($section = null, $sectionheadline = 'h2') {
