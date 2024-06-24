@@ -245,7 +245,7 @@ class rss_options {
  * @param string $option type of RSS: "Gallery" feed for latest images of the whole gallery
  * 																		"Album" for latest images only of the album it is called from
  * 																		"Collection" for latest images of the album it is called from and all of its subalbums
- * 																		"Comments" for all comments of all albums and images
+ * 																		"Comments-gallery" for all comments of all albums and images
  * 																		"Comments-image" for latest comments of only the image it is called from
  * 																		"Comments-album" for latest comments of only the album it is called from
  * 																		"AlbumsRSS" for latest albums
@@ -254,7 +254,7 @@ class rss_options {
  * 																		"News" feed for all news articles
  * 																		"Category" for only the news articles of the category that is currently selected
  * 																		"NewsWithImages" for all news articles and latest images
- * 																		"Comments" for all news articles and pages
+ * 																		"Comments-zenpage" for all comments of all news articles and pages
  * 																		"Comments-news" for comments of only the news article it is called from
  * 																		"Comments-page" for comments of only the page it is called from
  * 																		"Comments-all" for comments from all albums, images, news articels and pages
@@ -294,7 +294,7 @@ function getRSSLink($option, $lang = NULL, $addl = NULL) {
 				$link = array('rss' => 'gallery', 'folder' => $album->getName());
 			}
 			break;
-		case 'comments':
+		case 'comments-gallery':
 			if (getOption('RSS_comments')) {
 				$link = array('rss' => 'comments', 'type' => 'gallery');
 			}
@@ -346,9 +346,9 @@ function getRSSLink($option, $lang = NULL, $addl = NULL) {
 				$link = array('rss' => 'news', 'withimages' => '');
 			}
 			break;
-		case 'comments':
+		case 'comments-zenpage':
 			if (getOption('RSS_article_comments')) {
-				$link = array('comments' => 1, 'type' => 'zenpage');
+				$link = array('rss' => 'comments', 'type' => 'zenpage');
 			}
 			break;
 		case 'comments-news':
@@ -362,7 +362,7 @@ function getRSSLink($option, $lang = NULL, $addl = NULL) {
 			}
 			break;
 		case 'comments-all':
-			if (getOption('RSS_article_comments')) {
+			if (getOption('RSS_article_comments') && getOption('RSS_comments')) {
 				$link = array('rss' => 'comments', 'type' => 'allcomments');
 			}
 			break;
@@ -673,12 +673,12 @@ class RSS extends feed {
 					$imagenumber = $title;
 				}
 				$feeditem['desc'] = '<a title="' . $title . '" href="' . $itemlink . '">' . $thumburl . '</a>' .
-								'<p>' . html_encode($imagenumber) . '</p>' . $albumobj->getDesc($this->locale) . '<br />' . sprintf(gettext("Last update: %s"), zpFormattedDate(DATE_FORMAT, $filechangedate));
+								'<p>' . html_encode($imagenumber) . '</p>' . $albumobj->getDesc($this->locale) . '<br />' . sprintf(gettext("Last update: %s"), zpFormattedDate(DATETIME_DISPLAYFORMAT, $filechangedate));
 			} else {
 				if ($totalimages != 0) {
 					$imagenumber = sprintf(ngettext('%s (%u image)', '%s (%u images)', $totalimages), $title, $totalimages);
 				}
-				$feeditem['desc'] = '<a title="' . html_encode($title) . '" href="' . $itemlink . '">' . $thumburl . '</a>' . $item->getDesc($this->locale) . '<br />' . sprintf(gettext("Date: %s"), zpFormattedDate(DATE_FORMAT, $item->get('mtime')));
+				$feeditem['desc'] = '<a title="' . html_encode($title) . '" href="' . $itemlink . '">' . $thumburl . '</a>' . $item->getDesc($this->locale) . '<br />' . sprintf(gettext("Date: %s"), zpFormattedDate(DATETIME_DISPLAYFORMAT, $item->get('mtime')));
 			}
 			$ext = getSuffix($thumb->localpath);
 		} else {
@@ -688,7 +688,7 @@ class RSS extends feed {
 			$fullimagelink = html_encode(pathurlencode($item->getFullImageURL(FULLWEBPATH)));
 			$thumburl = '<img border="0" src="' . SERVER_HTTP_HOST . pathurlencode($item->getCustomImage($this->imagesize, NULL, NULL, NULL, NULL, NULL, NULL, TRUE)) . '" alt="' . $item->getTitle($this->locale) . '" /><br />';
 			$title = $item->getTitle($this->locale);
-			$datecontent = '<br />Date: ' . zpFormattedDate(DATE_FORMAT, $item->get('mtime'));
+			$datecontent = '<br />Date: ' . zpFormattedDate(DATETIME_DISPLAYFORMAT, $item->get('mtime'));
 			if (in_array($ext, array('mp3', 'm4a', 'm4v', 'mp4')) AND $this->mode != "album") {
 				$feeditem['desc'] = '<a title="' . html_encode($title) . ' in ' . html_encode($albumobj->getTitle($this->locale)) . '" href="' . $itemlink . '">' . $thumburl . '</a>' . $item->getDesc($this->locale) . $datecontent;
 			} else {
