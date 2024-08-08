@@ -1020,9 +1020,14 @@ class AlbumBase extends MediaObject {
 			return $parent;
 		}
 		if (zp_loggedin($action)) {
+			$subrights_required = false;
+			// If we check for backend UPLOAD_RIGHTS or ALBUM_RIGHTS specifially subrights are required
+			if (in_array($action, array(ALBUM_RIGHTS, UPLOAD_RIGHTS))) {
+				$subrights_required  = true;
+			}
 			$subRights = $this->albumSubRights();
-			if (is_null($subRights)) {
-// no direct rights, but if this is a private gallery and the album is published he should be allowed to see it
+			if (is_null($subRights) && !$subrights_required) {
+				// no direct rights, but if this is a private gallery and the album is published he should be allowed to see it
 				if (GALLERY_SECURITY != 'public' && $this->isPublic() && $action == LIST_RIGHTS) {
 					return LIST_RIGHTS;
 				}
