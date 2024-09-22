@@ -43,6 +43,11 @@ class openStreetMapOptions {
 		setOptionDefault('osmap_markerpopup_title', 1);
 		setOptionDefault('osmap_markerpopup_desc', 1);
 		setOptionDefault('osmap_markerpopup_thumb', 1);
+		setOptionDefault('osmap_markerpopup_thumb-type', 'custom');
+		setOptionDefault('osmap_markerpopup_thumb-size', 120);
+		setOptionDefault('osmap_markerpopup_title-length', 50);
+		setOptionDefault('osmap_markerpopup_desc-length', 100);
+		setOptionDefault('osmap_markerpopup_css-default', 1);
 		setOptionDefault('osmap_showlayerscontrol', 0);
 		setOptionDefault('osmap_layerscontrolpos', 'topright');
 		$layerslist = openStreetMap::getLayersList();
@@ -58,7 +63,14 @@ class openStreetMapOptions {
 		setOptionDefault('osmap_cluster_showcoverage_on_hover', 0);
 		if (class_exists('cacheManager')) {
 			cacheManager::deleteCacheSizes('openstreetmap');
-			cacheManager::addCacheSize('openstreetmap', 150, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, NULL);
+			$thumbtype = getOption('osmap_markerpopup_thumb-type');
+			if ($thumbtype == 'custom') {
+				$thumbsize = getOption('osmap_markerpopup_thumb-size');
+				if (!$thumbsize) {
+					$thumbsize = 120;
+				}
+				cacheManager::addCacheSize('openstreetmap', $thumbsize, NULL, NULL, NULL, NULL, NULL, NULL, true, NULL, NULL, NULL);
+			}
 		}
 	}
 
@@ -70,27 +82,22 @@ class openStreetMapOptions {
 				gettext('Map dimensions—width') => array(
 						'key' => 'osmap_width',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 1,
 						'desc' => gettext("Width of the map including the unit name e.g 100% (default for responsive map), 100px or 100em.")),
 				gettext('Map dimensions—height') => array(
 						'key' => 'osmap_height',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 2,
 						'desc' => gettext("Height of the map including the unit name e.g 100% (default for responsive map), 100px or 100em.")),
 				gettext('Map zoom') => array(
 						'key' => 'osmap_zoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 3,
 						'desc' => gettext("Default zoom level.")),
 				gettext('Map minimum zoom') => array(
 						'key' => 'osmap_minzoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 5,
 						'desc' => gettext("Default minimum zoom level possible.")),
 				gettext('Map maximum zoom') => array(
 						'key' => 'osmap_maxzoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 6,
 						'desc' => gettext("Default maximum zoom level possible. If no value is defined, use the maximum zoom level of the map used (may be different for each map).")),
 				gettext('Default layer') => array(
 						'key' => 'osmap_defaultlayer',
@@ -98,12 +105,11 @@ class openStreetMapOptions {
 						'order' => 7,
 						'selections' => $providers,
 						'desc' => gettext('The default map tile provider to use. Only free providers are included.'
-										. ' Some providers (Here, Mapbox, Thunderforest, Geoportail) require access credentials and registration.'
+										. ' Some providers (HEREv3, Mapbox, Thunderforest, Geoportail and Jawg) require access credentials and registration.'
 										. ' More info on <a href="https://github.com/leaflet-extras/leaflet-providers">leaflet-providers</a>')),
 				gettext('Zoom controls position') => array(
 						'key' => 'osmap_zoomcontrolpos',
 						'type' => OPTION_TYPE_SELECTOR,
-						'order' => 8,
 						'selections' => array(
 								gettext('Top left') => 'topleft',
 								gettext('Top right') => 'topright',
@@ -114,48 +120,61 @@ class openStreetMapOptions {
 				gettext('Cluster radius') => array(
 						'key' => 'osmap_clusterradius',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 9,
 						'desc' => gettext("The radius when marker clusters should be used.")),
 				gettext('Show cluster coverage on hover') => array(
 						'key' => 'osmap_cluster_showcoverage_on_hover',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 10,
 						'desc' => gettext("Enable if you want to the bounds of a marker cluster on hover.")),
 				gettext('Marker popups') => array(
 						'key' => 'osmap_markerpopup',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 11,
 						'desc' => gettext("Enable this if you wish info popups on the map markers. Only for album context or custom geodata.")),
 				gettext('Marker popups with thumbs') => array(
 						'key' => 'osmap_markerpopup_thumb',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 12,
 						'desc' => gettext("Enable if you want to show thumb of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with title') => array(
 						'key' => 'osmap_markerpopup_title',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 13,
 						'desc' => gettext("Enable if you want to show title of images in the marker popups. Only for album context.")),
 				gettext('Marker popups with description') => array(
 						'key' => 'osmap_markerpopup_desc',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 14,
 						'desc' => gettext("Enable if you want to show desc of images in the marker popups. Only for album context.")),
+				gettext('Image thumbs') => array('key' => 'osmap_markerpopup_thumb-type',
+						'type' => OPTION_TYPE_RADIO,
+						'buttons' => array(
+								gettext('Default thumb size') => 'default',
+								gettext('Custom image') => 'custom'),
+						'desc' => gettext('Choose the size of the thumb to be displayed in the marker popups. Default thumb size is determined by the theme (See Options->Theme->Standard options: Thumb size). Custom image size can be set below.<br>If Default thumb size is larger than 120px, you might need to use custom CSS to display them in full (see option below to disable default CSS files).')),
+				gettext('Custom image thumb size') => array(
+						'key' => 'osmap_markerpopup_thumb-size',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Set the width of the Custom Image to be used as thumb in the marker popups. Works if Custom image is selected in the previous option. Default size is 120px.<br>If Custom Image size is larger than 120px, you might need to use custom CSS to display them in full (see option below to disable default CSS files).")),
+				gettext('Length of Image title') => array(
+						'key' => 'osmap_markerpopup_title-length',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Set the length of the Image title to show in the marker popups. Leave EMPTY to display in full. Default is 50 characters.")),
+				gettext('Length of Image description') => array(
+						'key' => 'osmap_markerpopup_desc-length',
+						'type' => OPTION_TYPE_TEXTBOX,
+						'desc' => gettext("Set the length of the Image description to show in the marker popups. Leave EMPTY to display in full (not recommended if you have very long descriptions - they might not fit in the small popup space). Default is 100 characters.")),
+				gettext('Use default openstreetmap CSS') => array(
+						'key' => 'osmap_markerpopup_css-default',
+						'type' => OPTION_TYPE_CHECKBOX,
+						'desc' => gettext("Check to use default openstreetmap CSS files (located in '/zp-core/zp-extensions/openstreetmap/'). Default is Enabled.<br>Removing checkmark will DISABLE default CSS rules for Openstreetmap plugin - this option is intended for experienced users, who want to have full control and will allow to change map and popup markers presentation completely, so make sure to include relevant rules from openstreetmap.css, leaflet.css, MarkerCluster.css, MarkerCluster.Default.css in your theme CSS file and add custom images and icons.")),
 				gettext('Show layers controls') => array(
 						'key' => 'osmap_showlayerscontrol',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 14.2,
 						'desc' => gettext("Enable if you want to show layers controls with selected layers list below.")),
 				gettext('Layers list') => array(
 						'key' => 'osmap_layerslist',
 						'type' => OPTION_TYPE_CHECKBOX_UL,
-						'order' => 14.4,
 						'checkboxes' => $layerslist,
 						'desc' => gettext("Choose layers list to show in layers controls. No need to select the default layer again, otherwise it will be de-duplicated.")),
 				gettext('Layers controls position') => array(
 						'key' => 'osmap_layerscontrolpos',
 						'type' => OPTION_TYPE_SELECTOR,
-						'order' => 14.6,
 						'selections' => array(
 								gettext('Top left') => 'topleft',
 								gettext('Top right') => 'topright',
@@ -166,62 +185,54 @@ class openStreetMapOptions {
 				gettext('Show scale') => array(
 						'key' => 'osmap_showscale',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 15,
 						'desc' => gettext("Enable if you want to show scale overlay (kilometers and miles).")),
 				gettext('Show cursor position') => array(
 						'key' => 'osmap_showcursorpos',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 16,
 						'desc' => gettext("Enable if you want to show the coordinates if moving the cursor over the map.")),
 				gettext('Show album markers') => array(
 						'key' => 'osmap_showalbummarkers',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 17,
 						'desc' => gettext("Enable if you want to show the map on the single image page not only the marker of the current image but all markers from the album. The current position will be highlighted.")),
 				gettext('Mini map') => array(
 						'key' => 'osmap_showminimap',
 						'type' => OPTION_TYPE_CHECKBOX,
-						'order' => 18,
 						'desc' => gettext("Enable if you want to show an overview mini map in the lower right corner.")),
 				gettext('Mini map: width') => array(
 						'key' => 'osmap_minimap_width',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 19,
 						'desc' => gettext("Pixel width")),
 				gettext('Mini map: height') => array(
 						'key' => 'osmap_minimap_height',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 20,
 						'desc' => gettext("Pixel height")),
 				gettext('Mini map: Zoom level') => array(
 						'key' => 'osmap_minimap_zoom',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 21,
 						'desc' => gettext("The offset applied to the zoom in the minimap compared to the zoom of the main map. Can be positive or negative, defaults to -5.")),
-				gettext('HERE - App id') => array(
-						'key' => 'osmap_here_appid',
+				gettext('HEREv3 - App id') => array(
+						'key' => 'osmap_HEREv3_appid',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 22,
 						'desc' => ''),
-				gettext('HERE - App code') => array(
-						'key' => 'osmap_here_appcode',
+				gettext('HEREv3 - App code') => array(
+						'key' => 'osmap_HEREv3_appcode',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 23,
 						'desc' => ''),
 				gettext('Mapbox - Access token') => array(
 						'key' => 'osmap_mapbox_accesstoken',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 24,
 						'desc' => ''),
 				gettext('Thunderforest - ApiKey') => array(
 						'key' => 'osmap_thunderforest_apikey',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 25,
 						'desc' => ''),
 				gettext('GeoportailFrance - ApiKey') => array(
 						'key' => 'osmap_geoportailfrance_apikey',
 						'type' => OPTION_TYPE_TEXTBOX,
-						'order' => 26,
+						'desc' => ''),
+				gettext('Jawg - Access token') => array(
+						'key' => 'osmap_jawg_accesstoken',
+						'type' => OPTION_TYPE_TEXTBOX,
 						'desc' => ''),
 		);
 		return $options;
@@ -527,11 +538,15 @@ class openStreetMap {
 	 */
 	static function scripts() {
 		?>
-		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/leaflet.css" />
-		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/MarkerCluster.css" />
-		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/MarkerCluster.Default.css" />
-		<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/openstreetmap.css" />
 		<?php
+		if (getOption('osmap_markerpopup_css-default')) {
+			?>
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/leaflet.css" />
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/MarkerCluster.css" />
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/MarkerCluster.Default.css" />
+			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/openstreetmap.css" />
+			<?php
+		}
 		if (getOption('osmap_showcursorpos')) {
 			?>
 			<link rel="stylesheet" type="text/css" href="<?php echo FULLWEBPATH . '/' . ZENFOLDER . '/' . PLUGIN_FOLDER; ?>/openstreetmap/L.Control.MousePosition.css" />
@@ -568,8 +583,15 @@ class openStreetMap {
 		global $_zp_current_image;
 		$result = array();
 		$gps = $image->getGeodata();
+		$title_length = getOption('osmap_markerpopup_title-length');
+		$desc_length = getOption('osmap_markerpopup_desc-length');
+		$thumb_type = getOption('osmap_markerpopup_thumb-type');
+		$thumb_size = getOption('osmap_markerpopup_thumb-size');
 		if ($gps) {
-			$thumb = "<a href='" . $image->getLink() . "'><img src='" . $image->getCustomImage(150, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='' /></a>";
+			if ($thumb_type == 'default') {
+				$thumb = "<a href='" . $image->getLink() . "' title='" . $image->getTitle() . "'><img src='" . $image->getThumb() . "' alt='" . $image->getTitle() . "' class='openstreetmap-thumb' /></a>";
+			} else {
+				$thumb = "<a href='" . $image->getLink() . "' title='" . $image->getTitle() . "'><img src='" . $image->getCustomImage($thumb_size, NULL, NULL, NULL, NULL, NULL, NULL, true) . "' alt='" . $image->getTitle() . "' class='openstreetmap-thumb' /></a>"; }
 			$current = 0;
 			if ($this->mode == 'single-cluster' && isset($_zp_current_image) && ($image->filename == $_zp_current_image->filename && $image->getAlbumname() == $_zp_current_image->getAlbumname())) {
 				$current = 1;
@@ -577,8 +599,8 @@ class openStreetMap {
 			$result = array(
 					'lat' => $gps['lat'],
 					'long' => $gps['long'],
-					'title' => "<a href='" . $image->getLink() . "'>". js_encode(shortenContent($image->getTitle(), 50, '...')) . "</a><br />",
-					'desc' => js_encode(shortenContent($image->getDesc(), 100, '...')),
+					'title' => "<a href='" . $image->getLink() . "' title='" . $image->getTitle() . "' class='openstreetmap-title'>". js_encode(shortenContent($image->getTitle(), $title_length, '...')) . "</a>",
+					'desc' => js_encode(shortenContent($image->getDesc(), $desc_length, '...')),
 					'thumb' => $thumb,
 					'current' => $current
 			);
@@ -679,7 +701,7 @@ class openStreetMap {
 		if (!empty($geodata)) {
 			$geocount = count($geodata);
 			$bounds = '';
-			$count = '';
+			$count = 0;
 			foreach ($geodata as $g) {
 				$count++;
 				$bounds .= '[' . $g['lat'] . ',' . $g['long'] . ']';
@@ -747,10 +769,10 @@ class openStreetMap {
 								. "id: '" . strtolower($this->layer) . "', "
 								. "accessToken: '" . getOption('osmap_mapbox_accesstoken') . "'"
 								. "})";
-			case 'HERE':
+			case 'HEREv3':
 				return "L.tileLayer.provider('" . $this->layer . "', {"
-								. "app_id: '" . getOption('osmap_here_appid') . "', "
-								. "app_code: '" . getOption('osmap_here_appcode') . "'"
+								. "app_id: '" . getOption('osmap_HEREv3_appid') . "', "
+								. "app_code: '" . getOption('osmap_HEREv3_appcode') . "'"
 								. "})";
 			case 'Thunderforest':
 				return "L.tileLayer.provider('" . $this->layer . "', {"
@@ -759,6 +781,10 @@ class openStreetMap {
 			case 'GeoportailFrance':
 				return "L.tileLayer.provider('" . $this->layer . "', {"
 								. "apikey: '" . getOption('osmap_geoportailfrance_apikey') . "'"
+								. "})";
+			case 'Jawg':
+				return "L.tileLayer.provider('" . $this->layer . "', {"
+								. "accessToken: '" . getOption('osmap_jawg_accesstoken') . "'"
 								. "})";
 			default:
 				return "L.tileLayer.provider('" . $this->layer . "')";
@@ -931,12 +957,16 @@ class openStreetMap {
 				'OpenStreetMap.France',
 				'OpenStreetMap.HOT',
 				'OpenTopoMap',
+				'OpenRailwayMap',
 				'Thunderforest.OpenCycleMap',
+				'Thunderforest.Transport',
 				'Thunderforest.TransportDark',
 				'Thunderforest.SpinalMap',
 				'Thunderforest.Landscape',
-				'Hydda.Full',
-				// should be mapbox.streets,... but follow leaflet-providers behavior
+				'Thunderforest.Outdoors',
+				'Thunderforest.Pioneer',
+				'Thunderforest.MobileAtlas',
+				'Thunderforest.Neighbourhood',
 				'MapBox.streets',
 				'MapBox.light',
 				'MapBox.dark',
@@ -951,13 +981,18 @@ class openStreetMap {
 				'MapBox.pirates',
 				'MapBox.emerald',
 				'MapBox.high-contrast',
-				'Stamen.Watercolor',
-				'Stamen.Terrain',
-				'Stamen.TerrainBackground',
-				'Stamen.TopOSMRelief',
-				'Stamen.TopOSMFeatures',
+				'Stadia.AlidadeSmooth',
+				'Stadia.AlidadeSmoothDark',
+				'Stadia.AlidadeSatellite',
+				'Stadia.OSMBright',
+				'Stadia.Outdoors',
+				'Stadia.StamenToner',
+				'Stadia.StamenTonerBackground',
+				'Stadia.StamenTonerLite',
+				'Stadia.StamenWatercolor',
+				'Stadia.StamenTerrain',
+				'Stadia.StamenTerrainBackground',
 				'Esri.WorldStreetMap',
-				'Esri.DeLorme',
 				'Esri.WorldTopoMap',
 				'Esri.WorldImagery',
 				'Esri.WorldTerrain',
@@ -966,29 +1001,28 @@ class openStreetMap {
 				'Esri.OceanBasemap',
 				'Esri.NatGeoWorldMap',
 				'Esri.WorldGrayCanvas',
-				'HERE.normalDay',
-				'HERE.normalDayCustom',
-				'HERE.normalDayGrey',
-				'HERE.normalDayMobile',
-				'HERE.normalDayGreyMobile',
-				'HERE.normalDayTransit',
-				'HERE.normalDayTransitMobile',
-				'HERE.normalNight',
-				'HERE.normalNightMobile',
-				'HERE.normalNightGrey',
-				'HERE.normalNightGreyMobile',
-				'HERE.basicMap',
-				'HERE.mapLabels',
-				'HERE.trafficFlow',
-				'HERE.carnavDayGrey',
-				'HERE.hybridDay',
-				'HERE.hybridDayMobile',
-				'HERE.pedestrianDay',
-				'HERE.pedestrianNight',
-				'HERE.satelliteDay',
-				'HERE.terrainDay',
-				'HERE.terrainDayMobile',
-				'FreeMapSK',
+				'HEREv3.normalDay',
+				'HEREv3.normalDayCustom',
+				'HEREv3.normalDayGrey',
+				'HEREv3.normalDayMobile',
+				'HEREv3.normalDayGreyMobile',
+				'HEREv3.normalDayTransit',
+				'HEREv3.normalDayTransitMobile',
+				'HEREv3.normalNight',
+				'HEREv3.normalNightMobile',
+				'HEREv3.normalNightGrey',
+				'HEREv3.normalNightGreyMobile',
+				'HEREv3.basicMap',
+				'HEREv3.mapLabels',
+				'HEREv3.trafficFlow',
+				'HEREv3.carnavDayGrey',
+				'HEREv3.hybridDay',
+				'HEREv3.hybridDayMobile',
+				'HEREv3.pedestrianDay',
+				'HEREv3.pedestrianNight',
+				'HEREv3.satelliteDay',
+				'HEREv3.terrainDay',
+				'HEREv3.terrainDayMobile',
 				'MtbMap',
 				'CartoDB.Positron',
 				'CartoDB.PositronNoLabels',
@@ -996,15 +1030,34 @@ class openStreetMap {
 				'CartoDB.DarkMatter',
 				'CartoDB.DarkMatterNoLabels',
 				'CartoDB.DarkMatterOnlyLabels',
-				'HikeBike.HikeBike',
-				'HikeBike.HillShading',
-				'BasemapAT.basemap',
-				'BasemapAT.grau',
-				'BasemapAT.highdpi',
-				'BasemapAT.orthofoto',
-				'NLS',
-				'GeoportailFrance.ignMaps',
+				'CartoDB.Voyager',
+				'CartoDB.VoyagerNoLabels',
+				'CartoDB.VoyagerOnlyLabels',
+				'CartoDB.VoyagerLabelsUnder',
+				'GeoportailFrance.plan',
 				'GeoportailFrance.orthos',
+				'BaseMapDE.Color',
+				'BaseMapDE.Grey',
+				'CyclOSM',
+				'Jawg.Streets',
+				'Jawg.Terrain',
+				'Jawg.Lagoon',
+				'Jawg.Sunny',
+				'Jawg.Dark',
+				'Jawg.Light',
+				'Jawg.Matrix',
+				'MapBox',
+				'NASAGIBS.ModisTerraTrueColorCR',
+				'NASAGIBS.ModisTerraBands367CR',
+				'NASAGIBS.ModisTerraLSTDay',
+				'NASAGIBS.ModisTerraSnowCover',
+				'NASAGIBS.ModisTerraAOD',
+				'NASAGIBS.ModisTerraChlorophyll',
+				'USGS.USTopo',
+				'USGS.USImagery',
+				'USGS.USImageryTopo',
+				'TopPlusOpen.Color',
+				'TopPlusOpen.Grey',
 		);
 	}
 

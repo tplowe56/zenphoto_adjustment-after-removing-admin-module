@@ -945,9 +945,9 @@ function handleSearchParms($what, $album = NULL, $image = NULL) {
 		if (!is_null($_zp_current_zenpage_page)) {
 			$pages = $_zp_current_search->getPages();
 			if (!empty($pages)) {
-				$tltlelink = $_zp_current_zenpage_page->getName();
+				$titlelink = $_zp_current_zenpage_page->getName();
 				foreach ($pages as $apage) {
-					if ($apage == $tltlelink) {
+					if ($apage == $titlelink) {
 						$context = $context | ZP_SEARCH_LINKED;
 						break;
 					}
@@ -957,9 +957,9 @@ function handleSearchParms($what, $album = NULL, $image = NULL) {
 		if (!is_null($_zp_current_zenpage_news)) {
 			$news = $_zp_current_search->getArticles(0, NULL, true);
 			if (!empty($news)) {
-				$tltlelink = $_zp_current_zenpage_news->getName();
+				$titlelink = $_zp_current_zenpage_news->getName();
 				foreach ($news as $anews) {
-					if ($anews['titlelink'] == $tltlelink) {
+					if ($anews['titlelink'] == $titlelink) {
 						$context = $context | ZP_SEARCH_LINKED;
 						break;
 					}
@@ -1162,7 +1162,7 @@ function getTagCountByAccess($tag) {
 		$sql = "SELECT tagid, type, objectid FROM " . $_zp_db->prefix('obj_to_tag') . " ORDER BY tagid";
 		$_zp_object_to_tags = $_zp_db->queryFullArray($sql);
 	}
-	$count = '';
+	$count = 0;
 	if ($_zp_object_to_tags) {
 		foreach ($_zp_object_to_tags as $tagcheck) {
 			if ($tagcheck['tagid'] == $tag['id']) {
@@ -1385,9 +1385,11 @@ function generateAttributesFromArray($attributes = array(), $exclude = array()) 
 			'truespeed'
 	);
 	$attr = '';
-	if (!empty($attributes) && is_array($attributes)) {
-		foreach ($attributes as $key => $val) {
-			if (!in_array($key, $exclude)) {
+	$attributes_unique = array_unique($attributes);
+	$exclude_unique = array_unique($exclude);
+	if (!empty($attributes_unique) && is_array($attributes_unique)) {
+		foreach ($attributes_unique as $key => $val) {
+			if (!in_array($key, $exclude_unique)) {
 				if (empty($val)) {
 					if (in_array($key, $boolean_attr)) {
 						$attr .= ' ' . $key;

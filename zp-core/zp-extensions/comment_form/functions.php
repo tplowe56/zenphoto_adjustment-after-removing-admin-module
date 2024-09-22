@@ -334,11 +334,11 @@ function comment_form_addComment($name, $email, $website, $comment, $code, $code
 	
 	// Quizes
 	if ($whattocheck & COMMENT_TEXTQUIZ) {
-		$textquiz_answer = trim(get_language_string(getOption('comment_form_textquiz_answer')));
-		$textquiz_answer_user = trim($textquiz_answer_user);
+		$textquiz_answer = strtolower(trim(get_language_string(getOption('comment_form_textquiz_answer'))));
+		$textquiz_answer_user = strtolower(trim($textquiz_answer_user));
 		if (empty($textquiz_answer_user) || $textquiz_answer != $textquiz_answer_user) {
 			$commentobj->setInModeration(-8);
-			$commentobj->comment_error_text .= ' ' . gettext("You must enter the correct text quiz answer.") . '.';
+			$commentobj->comment_error_text .= ' ' . gettext("You must enter the correct text quiz answer.");
 			$goodMessage = false;
 		}
 	}
@@ -347,7 +347,7 @@ function comment_form_addComment($name, $email, $website, $comment, $code, $code
 		$mathquiz_answer_user = trim($mathquiz_answer_user);
 		if (empty($mathquiz_answer_user) || $mathquiz_answer != $mathquiz_answer_user) {
 			$commentobj->setInModeration(-8);
-			$commentobj->comment_error_text .= ' ' . gettext("You must enter the correct math quiz answer.") . '.';
+			$commentobj->comment_error_text .= ' ' . gettext("You must enter the correct math quiz answer.");
 			$goodMessage = false;
 		}
 	}

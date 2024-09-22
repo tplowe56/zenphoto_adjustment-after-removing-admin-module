@@ -102,7 +102,10 @@ class imageMetaFormatter {
 				$data = $data . ' EV';
 				break;
 			case 'FocalLength':
-				$data = self::rationalNum($data) . ' mm';
+				$data = self::rationalNum($data);
+				if (is_numeric($data)) {
+					$data = round(floatval($data), 1) . ' mm';
+				}
 				break;
 			case 'Orientation':
 				// Example of how all of these tag formatters should be...
@@ -587,7 +590,10 @@ class imageMetaFormatter {
 				}
 				break;
 			case 'GPSAltitude':
-				$data = self::rationalNum($data) . ' m';
+				$data = self::rationalNum($data);
+				if (is_numeric($data)) {
+					$data = round(floatval($data), 1) . ' m';
+				}
 				break;
 			case 'GPSAltitudeRef':
 				if ($data == "00000000") {
@@ -651,7 +657,8 @@ class imageMetaFormatter {
 		if ($v[$i] == '.') {
 			$i--;
 		}
-		return substr($v, 0, $i + 1);
+		$value = str_replace(',','.', $v); // fix locale aware floats due to num to string conversion
+		return substr($value, 0, $i + 1);
 	}
 
 }

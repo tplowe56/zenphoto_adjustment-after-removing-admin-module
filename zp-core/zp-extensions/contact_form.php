@@ -344,8 +344,8 @@ class contactForm {
 			
 			// Quizes
 			if (contactForm::getQuizFieldQuestion('contactform_textquiz')) {
-				$textquiz_answer = trim(get_language_string(getOption('contactform_textquiz_answer')));
-				$textquiz_answer_user = trim($mailcontent['textquiz']);
+				$textquiz_answer = strtolower(trim(get_language_string(getOption('contactform_textquiz_answer'))));
+				$textquiz_answer_user = strtolower(trim($mailcontent['textquiz']));
 				if (empty($textquiz_answer_user) || $textquiz_answer_user != $textquiz_answer) {
 					$error[16] = gettext("the correct text quiz answer");
 				}
@@ -791,7 +791,7 @@ class contactForm {
 		$macros['CONTACTFORM'] = array(
 				'class' => 'function',
 				'params' => array('string*'),
-				'value' => 'self::printMacro',
+				'value' => 'contactForm::printMacro',
 				'owner' => 'contact_form',
 				'desc' => gettext('Set %1 to optionally override the subject.')
 		);

@@ -1028,7 +1028,7 @@ function printAdminHeader($tab, $subtab = NULL) {
 				</label>
 				<?php
 				if (array_key_exists($item, $extra)) {
-					$unique = '';
+					$unique = 0;
 					foreach (array_reverse($extra[$item]) as $box) {
 						if ($box['display']) {
 							if (isset($box['disable'])) {
@@ -3392,8 +3392,10 @@ function printManagedObjects($type, $objlist, $alterrights, $userobj, $prefix_id
 	} else {
 		$itemcount = '';
 	}
+	if(empty($rest) && empty($cv)) {
+		return;
+	}
 	?>
-
 	<div class="box-albums-unpadded">
 		<h2 class="h2_bordered_albums">
 			<a href="javascript:toggle('<?php echo $prefix ?>');" title="<?php echo html_encode($hint); ?>" ><?php echo $text . $itemcount; ?></a>

@@ -91,6 +91,10 @@ class ThemeObject extends PersistentObject {
 	 * @return bool
 	 */
 	function isPublished($use_dbvalue = false) {
+		// scheduled items are technically already published so override
+		if ($this->hasPublishSchedule()) { 
+			return false;
+		}
 		if ($use_dbvalue) {
 			return $this->get('show', false);
 		}
@@ -349,6 +353,8 @@ class ThemeObject extends PersistentObject {
 	 * @param bool $anon set to true if the poster wishes to remain anonymous
 	 * @param string $customdata
 	 * @param bool $dataconfirmation true or false if data privacy confirmation was required
+	 * @param string $p_textquiz_answer
+	 * @param string $p_mathquiz_answer
 	 * @return object
 	 */
 	function addComment($name, $email, $website, $comment, $code, $code_ok, $ip, $private, $anon, $customdata, $dataconfirmation, $p_textquiz_answer, $p_mathquiz_answer) {
