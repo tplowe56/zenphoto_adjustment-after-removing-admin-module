@@ -10,6 +10,9 @@
 /temp
 /tests
 /zenpage
+/themes/zpBootstrap-min
+/themes/zpBootstrap-light
+/themes/zpBootstrap-dk
 
 # folders that should be empty #
 ################################
